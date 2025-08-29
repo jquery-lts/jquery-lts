@@ -1,4 +1,4 @@
-name: 'jQuery Security Tests'
+name: 'jQuery LTS Security Tests'
 
 on: [pull_request, push, workflow_dispatch]
 
@@ -6,13 +6,12 @@ permissions:
   contents: read
 
 jobs:
-  test-security:
+  test-security-firefox:
+    name: jQuery LTS - Firefox
     strategy:
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
-      - uses: browser-actions/setup-chrome@v1
-        id: chrome
       - uses: browser-actions/setup-firefox@v1
         id: firefox
       - uses: actions/checkout@v4
@@ -35,6 +34,22 @@ jobs:
         working-directory: test
         env:
           PUPPETEER_EXECUTABLE_PATH: ${{ steps.firefox.outputs.firefox-path }}
+  test-security-chrome:
+    name: jQuery LTS - Chrome
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: browser-actions/setup-chrome@v1
+        id: chrome
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+      - run: npm ci
+        working-directory: server
+      - run: npm ci
+        working-directory: test
       - run: npm test -- --browser=chrome
         working-directory: test
         env:
