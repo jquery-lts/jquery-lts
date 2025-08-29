@@ -1,6 +1,6 @@
 (function(){
 /*
- * jQuery 1.2.7-sec - New Wave Javascript
+ * jQuery-LTS 1.2.7 - New Wave Javascript
  *
  * Copyright (c) 2008 John Resig (jquery.com)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -23,7 +23,7 @@ var jQuery = window.jQuery = window.$ = function( selector, context ) {
 // A simple way to check for HTML strings or ID strings
 // Prioritize #id over <tag> to avoid XSS via location.hash (#9521)
 // Strict HTML recognition (#11290: must start with <)
-quickExpr = /^(?:(<[\w\W]+>)[^>]*|#([\w-]*))$/,
+var quickExpr = /^(?:(<[\w\W]+>)[^>]*|#([\w-]*))$/,
 
 // Is it a simple selector
 	isSimple = /^.[^:#\[\.]*$/,
@@ -85,7 +85,7 @@ jQuery.fn = jQuery.prototype = {
 	},
 
 	// The current version of jQuery being used
-	jquery: "1.2.7-sec",
+	jquery: "1.2.7",
 
 	// The number of elements contained in the matched element set
 	size: function() {

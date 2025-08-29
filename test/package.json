@@ -1,18 +1,16 @@
 {
   "private": true,
   "scripts": {
-    "//": "run server for manual testing",
-    "serve": "node ../server/index.cjs",
-    "//": "use node test runner",
-    "node": "npm test node",
-    "//": "use tap test runner",
-    "tap": "npm test tap",
     "//": "run directly; raw tap output",
+    "serve": "node ../server/index.cjs",
+    "node": "npm test node",
+    "tap": "npm test tap",
     "test": "./test.sh"
   },
   "dependencies": {
-    "chalk": "^5.3.0",
-    "jsdom": "^24.0.0",
-    "tap": "^18.7.0"
+    "colorette": "^2.0.20",
+    "jsdom": "^26.1.0",
+    "puppeteer": "^24.17.1",
+    "tap": "^21.1.0"
   }
 }
