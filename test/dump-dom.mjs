@@ -41,7 +41,8 @@ async function getBrowserInstance(browser) {
   if (!browserInstance) {
     const launchOptions = {
       headless: true,
-      browser: browser
+      browser: browser,
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
     };
 
     if (browser === 'firefox') {
@@ -51,6 +52,11 @@ async function getBrowserInstance(browser) {
     } else if (browser === 'chrome') {
       if (os.platform() === 'darwin') {
         launchOptions.executablePath = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+      }
+
+      if(process.env.PUPPETEER_EXECUTABLE_PATH) {
+        // running in GH action
+        launchOptions.args = ['--no-sandbox'];
       }
     } else {
       throw new Error(`unsupported browser: ${browser}. supported browsers: firefox, chrome`);

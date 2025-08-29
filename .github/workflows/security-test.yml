@@ -7,9 +7,14 @@ permissions:
 
 jobs:
   test-security:
+    strategy:
+      fail-fast: false
     runs-on: ubuntu-latest
     steps:
       - uses: browser-actions/setup-chrome@v1
+        id: chrome
+      - uses: browser-actions/setup-firefox@v1
+        id: firefox
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
@@ -18,5 +23,19 @@ jobs:
         working-directory: server
       - run: npm ci
         working-directory: test
-      - run: npm test
+      - run: npm test node
         working-directory: test
+        env:
+          PUPPETEER_EXECUTABLE_PATH: ${{ steps.firefox.outputs.firefox-path }}
+      - run: npm test tap
+        working-directory: test
+        env:
+          PUPPETEER_EXECUTABLE_PATH: ${{ steps.firefox.outputs.firefox-path }}
+      - run: npm test -- --browser=firefox
+        working-directory: test
+        env:
+          PUPPETEER_EXECUTABLE_PATH: ${{ steps.firefox.outputs.firefox-path }}
+      - run: npm test -- --browser=chrome
+        working-directory: test
+        env:
+          PUPPETEER_EXECUTABLE_PATH: ${{ steps.chrome.outputs.chrome-path }}
