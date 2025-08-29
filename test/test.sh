@@ -7,7 +7,7 @@ if [ "$1" = "node" ] ; then
 elif [ "$1" = "tap" ] ; then
 	tap run --allow-empty-coverage;
 else
-	node test.mjs;
+	node test.mjs "$@";
 fi
 
 TEST_EXIT=$? ;

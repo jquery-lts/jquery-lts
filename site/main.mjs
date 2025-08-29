@@ -1,4 +1,4 @@
-import { cveMap, getPatchedVersion, jQueryVersions } from './cve-data.mjs'
+import { cveMap, getLTSVersion, jQueryVersions } from './cve-data.mjs'
 
 function log(txt){
   console.log(txt);
@@ -44,7 +44,7 @@ const cveTemplate = `
 `
 
 const selVersion = document.getElementById('version');
-const chkPatched = document.getElementById('patched');
+const chkLTS = document.getElementById('lts');
 const cveContainer = document.getElementById('cve-container');
 const cveButtons = [];
 
@@ -72,16 +72,16 @@ for (const v of jQueryVersions) {
 }
 
 const VERSION = 'VERSION';
-const PATCHED = 'PATCHED';
+const LTS = 'LTS';
 
 const qs = (new URL(document.location)).searchParams;
 const qsVersion = qs.get(VERSION);
-const qsPatched = qs.get(PATCHED);
+const qsLts = qs.get(LTS);
 
 if(qsVersion) {
 
 	selVersion.value = qsVersion;
-	chkPatched.checked = qsPatched === 'true';
+	chkLTS.checked = qsLts === 'true';
 
 	// clear out query string
 	window.history.pushState({}, "",  document.location.href.split("?")[0]);
@@ -90,11 +90,11 @@ if(qsVersion) {
 else {
 
 	const sessionVersion = sessionStorage.getItem(VERSION);
-	const sessionPatched = sessionStorage.getItem(PATCHED) === 'true';
+	const sessionLts = sessionStorage.getItem(LTS) === 'true';
 
 	if(sessionVersion) {
 		selVersion.value = sessionVersion;
-		chkPatched.checked = sessionPatched;
+		chkLTS.checked = sessionLts;
 	}
 
 }
@@ -104,10 +104,28 @@ changeVersion();
 function changeVersion() {
 
 	const version = selVersion.value;
-	const patched = chkPatched.checked;
+	const lts = chkLTS.checked;
 
 	sessionStorage.setItem(VERSION, version);
-	sessionStorage.setItem(PATCHED, patched);
+	sessionStorage.setItem(LTS, lts);
+
+	let loadVersion;
+	let displayVersion;
+	let sourcePath;
+	let displayPrefix;
+
+	if(lts) {
+		loadVersion = getLTSVersion(version);
+		displayVersion = `jQuery-LTS v${loadVersion}`;
+		sourcePath = `vendor/jquery-lts-${loadVersion}.js`;
+		displayPrefix = 'jQuery-LTS';
+	}
+	else {
+		loadVersion = version;
+		displayVersion = `jQuery v${loadVersion}`;
+		sourcePath = `vendor/jquery-${loadVersion}.js`;
+		displayPrefix = 'jQuery';
+	}
 
 	const s = document.createElement('script');
 
@@ -120,26 +138,24 @@ function changeVersion() {
 			}
 		});
 
-		document.getElementById('loaded-jQuery').textContent = jQuery.fn.jquery;
+		document.getElementById('loaded-jQuery').textContent = `${displayPrefix} v${jQuery.fn.jquery}`;
 
 		// bring this line back after fixing errors
 		cveButtons.forEach(b => b.click());
 		document.querySelectorAll('.cve').forEach(e => e.classList.remove('hide'));
 	};
 
-	const loadVersion = patched ? getPatchedVersion(version) : version;
-
 	s.onerror = function() {
 		if(typeof jQuery !== 'undefined') {
-			error(`failed to load jQuery ${loadVersion}. jQuery ${jQuery.fn.jquery} is still currently loaded`);
+			error(`failed to load ${displayVersion}. jQuery ${jQuery.fn.jquery} is still currently loaded`);
 		}
 		else {
-			error(`failed to load jQuery ${loadVersion}.`);
+			error(`failed to load ${displayVersion}.`);
 		}
 		document.querySelectorAll('.cve').forEach(e => e.classList.add('hide'));
 	};
 
-  s.src = `vendor/jquery-${loadVersion}.js`;
+  s.src = sourcePath;
 
 	document.body.appendChild(s);
 
@@ -155,7 +171,7 @@ function changeVersion() {
 }
 
 selVersion.addEventListener("change", changeVersion);
-chkPatched.addEventListener("change", changeVersion);
+chkLTS.addEventListener("change", changeVersion);
 
 function triggerCVE(cveID){
   const cve = cveMap.get(cveID);
@@ -165,8 +181,8 @@ function triggerCVE(cveID){
 function updateCVE(cve) {
 
 	const cveID = `CVE-${cve[0]}`;
-	const version = sessionStorage.getItem(VERSION); // use version from session/select because our CVE map doesn't have the patched versions
-	const patched = sessionStorage.getItem(PATCHED) === 'true';
+	const version = sessionStorage.getItem(VERSION); // use version from session/select because our CVE map doesn't have the lts versions
+	const lts = sessionStorage.getItem(LTS) === 'true';
   const isAffectedVersion = cve[1].versions.includes(version);
 
 	const $relevantCVEFooter = $(`div.cve__header:contains(${cveID})`).siblings('.cve__footer');
@@ -190,7 +206,7 @@ function updateCVE(cve) {
 	else {
 		$footerStatus.text(`Can't reproduce! 🎉`);
 
-		if(!patched) {
+		if(!lts) {
 			if(isAffectedVersion) {
 				$footerNote.text(`but v${version} should be vulnerable 🤔`);
 			}
